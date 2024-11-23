@@ -1,0 +1,157 @@
+The Auth Guard in Angular is a security mechanism used to protect routes in your application by controlling user access based on specific conditions, such as authentication or authorization. It ensures that only authorized users can navigate to certain parts of the app.
+
+Why Use Auth Guard?
+Restrict Access to Routes: Auth Guards ensure that only authenticated users can access protected pages, like dashboards or admin panels.
+
+For instance:
+1. A user who isn't logged in cannot access the "Profile" or "Dashboard" route.
+2. Guards prevent unauthorized access to sensitive data.
+3. Authorization Control: Auth Guards can restrict access based on user roles or permissions:
+
+For example, only users with an "Admin" role can access the admin panel, while regular users are redirected to a different page.
+
+How Auth Guards Work
+Auth Guards are implemented as part of Angular's router lifecycle.
+Before activating a route, the canActivate (or its functional equivalent) method checks the conditions.
+If the conditions fail, the guard can redirect the user or prevent route activation.
+
+1. Using Functional Route Guards
+Functional guards allow you to write simpler, cleaner logic without creating a dedicated class.
+
+Example Implementation:
+Step 1: Create a Functional Guard Create a function that implements the guard logic.
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from './auth.service';
+
+export const authGuard = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isLoggedIn()) {
+    return true; // Allow navigation
+  }
+
+  // Redirect to login if not authenticated
+  return router.parseUrl('/login');
+};
+
+
+
+
+Step 2: Use the Functional Guard in Routes Update your app-routing.module.ts or wherever you define your routes.
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { authGuard } from './auth.guard';
+
+const routes: Routes = [
+  {
+    path: 'dashboard',
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+    canActivate: [authGuard], // Use the new guard
+  },
+  {
+    path: 'login',
+    loadChildren: () => import('./login/login.module').then(m => m.LoginModule),
+  },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule {}
+
+
+
+In Angular 15 and later, the canActivate method used in route guards has been replaced with the new functional route guards or standalone guards. The new approach is more flexible and better aligns with Angular's evolving architecture. Let me guide you through the updated implementation.
+
+1. Using Functional Route Guards
+Functional guards allow you to write simpler, cleaner logic without creating a dedicated class.
+
+Example Implementation:
+Step 1: Create a Functional Guard Create a function that implements the guard logic.
+
+typescript
+Copy code
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from './auth.service';
+
+export const authGuard = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isLoggedIn()) {
+    return true; // Allow navigation
+  }
+
+  // Redirect to login if not authenticated
+  return router.parseUrl('/login');
+};
+Step 2: Use the Functional Guard in Routes Update your app-routing.module.ts or wherever you define your routes.
+
+typescript
+Copy code
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { authGuard } from './auth.guard';
+
+const routes: Routes = [
+  {
+    path: 'dashboard',
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+    canActivate: [authGuard], // Use the new guard
+  },
+  {
+    path: 'login',
+    loadChildren: () => import('./login/login.module').then(m => m.LoginModule),
+  },
+];
+
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule {}
+2. Using a Class-Based Guard
+The class-based approach is still valid but has minor changes in Angular 15+.
+
+Example Implementation:
+Step 1: Update the canActivate Method
+
+Angular has deprecated the canActivate interface in favor of returning an Observable, Promise, or boolean directly in a guard's implementation.
+
+Here’s how you do it:
+import { Injectable } from '@angular/core';
+import { CanActivateFn } from '@angular/router';
+import { Router } from '@angular/router';
+import { AuthService } from './auth.service';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthGuardService implements CanActivateFn {
+  constructor(private authService: AuthService, private router: Router) {}
+
+  canActivate(): boolean {
+    if (this.authService.isLoggedIn()) {
+      return true; // Allow navigation
+    }
+
+    // Redirect to login if not authenticated
+    this.router.navigate(['/login']);
+    return false;
+  }
+}
+
+Step 2: Use the Class-Based Guard in Routes Modify your routing configuration to use the new class guard.
+const routes: Routes = [
+  {
+    path: 'dashboard',
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+    canActivate: [AuthGuardService],
+  },
+];
+
