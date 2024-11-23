@@ -1,0 +1,12 @@
+npm install jwt-decode (Library)
+
+// Method to extract user role from JWT
+  getUserRole(token: string): string | null {
+    try {
+      const decodedToken: any = jwt_decode(token); // Decode the token
+      return decodedToken.role || null; // Return the role, if it exists
+    } catch (error) {
+      console.error('Error decoding token', error);
+      return null; // Return null if decoding fails
+    }
+  }
