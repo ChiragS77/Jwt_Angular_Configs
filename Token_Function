@@ -1,0 +1,22 @@
+
+ saveToken(token:any):void{
+  localStorage.setItem('token',token);
+ }
+
+  getToken():string | null {
+       return localStorage.getItem('authToken');
+  }
+
+  clearToken():void{
+    localStorage.removeItem('authToken');
+  }
+
+  hasToken():boolean{
+     return !!this.getToken();
+  }
+
+
+
+  isLoggedIn():boolean{
+    return !!this.getToken();
+  }
